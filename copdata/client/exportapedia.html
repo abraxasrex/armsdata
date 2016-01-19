@@ -1,0 +1,67 @@
+<head>
+  <title>Exportapedia</title>
+</head>
+
+<body>
+  <div class="jumbotron bg">
+  <h1 style="margin-bottom:0px;">Exportapedia: $$ Global Arms Sales in 2010 $$ </h1>
+</div>
+  <div id="container" style="width: 80%; height: 800px; margin-top:0px;"></div>
+<div>
+
+</div>
+
+  <script>
+    var map= new Datamap({element: document.getElementById('container'),
+    done: function(datamap) {
+    datamap.svg.selectAll('.datamaps-subunit').on('click', function(geography, data) {
+
+         var m = {};
+         m[geography.id] = '#ff3300';
+           datamap.updateChoropleth(m);
+
+         for(var i=0; i<armsdata.length; i++){
+
+           if(armsdata[i].e=== geography.properties.name){
+          if(!geography.properties.count){
+             geography.properties.count= armsdata[i].v;
+
+            //   data.forEach(function(thing){
+              //   console.log(thing);
+            //   });
+
+
+         }else{
+           geography.properties.count= 0;
+         }
+      }
+   }
+});
+},
+    projection: 'mercator',
+    geographyConfig: {
+       dataUrl: null, //if not null, datamaps will fetch the map JSON (currently only supports topojson)
+       hideAntarctica: true,
+       borderWidth: 1,
+       borderOpacity: 1,
+       borderColor: '#FDFDFD',
+       popupTemplate: function(geo, data) { //this function should just return a string
+         return ['<div class="hoverinfo"><strong>',
+                        geo.properties.name,
+                        ' sold: ',
+                        geo.properties.count,
+                        '</strong></div>'].join('');
+       },
+       popupOnHover: true, //disable the popup while hovering
+       highlightOnHover: true,
+       highlightFillColor: '#FC8D59',
+       highlightBorderColor: 'rgba(250, 15, 160, 0.2)',
+       highlightBorderWidth: 2,
+       highlightBorderOpacity: 1
+   }
+  });
+
+
+  </script>
+
+</body>
