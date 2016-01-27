@@ -3,8 +3,8 @@
 </head>
 
 <body>
-  <div class="jumbotron bg">
-  <h1 style="margin-bottom:0px;">Exportapedia: $$ Global Arms Sales in 2010 $$ </h1>
+  <div class="jumbotron">
+  <h3 style="margin-bottom:0px;">Exportapedia: $$ Global Arms Sales in 2010 $$ </h3>
 </div>
   <div id="container" style="width: 80%; height: 800px; margin-top:0px;"></div>
 <div>
@@ -16,20 +16,24 @@
     done: function(datamap) {
     datamap.svg.selectAll('.datamaps-subunit').on('click', function(geography, data) {
 
-         var m = {};
-         m[geography.id] = '#ff3300';
-           datamap.updateChoropleth(m);
+         for(var y=0; y<armsdata.length; y++){
 
-         for(var i=0; i<armsdata.length; i++){
-
-           if(armsdata[i].e=== geography.properties.name){
+           if(armsdata[y].e=== geography.properties.name){
           if(!geography.properties.count){
-             geography.properties.count= armsdata[i].v;
 
-            //   data.forEach(function(thing){
-              //   console.log(thing);
-            //   });
+            var m = {};
+            m[geography.id] = '#ff3300';
+              datamap.updateChoropleth(m);
 
+             geography.properties.count= armsdata[y].v;
+
+            for(var z=0; z< datamap.worldTopo.objects.world.geometries.length; z++){
+              if(datamap.worldTopo.objects.world.geometries[z].properties.name== armsdata[y].i){
+                var n={};
+                n[datamap.worldTopo.objects.world.geometries[z].id]= '#000000';
+                   datamap.updateChoropleth(n);
+              }
+            }
 
          }else{
            geography.properties.count= 0;
