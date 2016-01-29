@@ -22,3 +22,5 @@ d3js:d3
 hyperborea:datamaps
 http
 materialize:materialize
+twbs:bootstrap
+aramk:tinycolor
