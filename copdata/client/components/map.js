@@ -1,66 +1,70 @@
 
 
-Session.setDefault("45");
-
-  Template.map.helpers({
-    year: function () {
-      return  Session.get("year");
-    }
-  });
-
-  Template.map.events({
-    'keyup input': function (event) {
-      Session.set("year", event.target.value);
-
-
-
-    }
-  });
-
-
-
-
 
 Template.map.onRendered( function (){
-var map= new Datamap({element: document.getElementById('container'),
+
+function fahrenheit(temp){
+  return ((temp * 9) /5) + 32;
+
+  }
+
+var map= new Datamap({element: document.getElementById('data_map'),
 fills: {
-      defaultFill:  '#f0f5f5' //the keys in this object map to the "fillKey" of [data] or [bubbles]
+      defaultFill:  '#f0f5f5'
     },
 done: function(datamap) {
 
 datamap.svg.selectAll('.datamaps-subunit').on('click', function(geography, data) {
 
-var url_single= "http://climatedataapi.worldbank.org/climateweb/rest/v1/country/cru/tas/year/" + geography.id;
+var url= "http://climatedataapi.worldbank.org/climateweb/rest/v1/country/cru/tas/year/" + geography.id;
 
-  Meteor.call("serverCall", url_single, function(err, results) {
+  Meteor.call("serverCall", url, function(err, results) {
     if(!err){
-      //console.log(results);
       var parsed = results.data;
-      for(var i=0; i<parsed.length; i++){
+      for(var i=0; i < parsed.length; i++){
 
-        if(parsed[i].year == document.getElementById("rangeinput").value){
+        if(parsed[i].year == document.getElementById("rangeinput2").value /*&& document.getElementById("rangeinput2").value > document.getElementById("rangeinput1")*/){
 
-          geography.properties.temp= parsed[i].data;
-          var temp= parsed[i].data + 10;
-          geography.properties.year= parsed[i].year;
+          var  end_temp= fahrenheit(parsed[i].data);
 
-          var redness= Math.round(Math.pow(temp, 2)/ 4.9);
-          var blueness= Math.round(200/(Math.pow(temp, 2)));
-          var greenness= Math.round(blueness/5);
+
+          var j = i -(parsed[i].year - document.getElementById("rangeinput1").value);
+          var start_temp= fahrenheit(parsed[j].data);
+
+
+           var temp_diff= end_temp- start_temp;
+
+          geography.properties.temp= temp_diff;
+          geography.properties.year1= parsed[j].year;
+          geography.properties.year2= parsed[i].year;
+
+          var redness= Math.round(75 * (temp_diff));
+          var blueness= Math.round(255 / Math.pow(temp_diff, 3) );
+          var greenness= Math.round(blueness/3);
         var color= tinycolor({r:redness, g:greenness, b:blueness});
         var hexcolor= color.toHexString();
 
         var m = {};
         m[geography.id] = hexcolor;
           datamap.updateChoropleth(m);
+          m[geography.id] = diff;
+        map.labels({'customLabelText': "test"});
+
+
       }
-    else{
+    else if(document.getElementById("rangeinput2") < document.getElementById("rangeinput1")){
+      console.log("invalid range");
+        alert("Time moves forwards, not backwards.");
+     }
+};
+
+    } else{
       console.log(err);
        }
-  };
-};
+
 });
 });
+
 },
 projection: 'mercator',
 geographyConfig: {
@@ -73,10 +77,12 @@ geographyConfig: {
      if(geo.properties.temp){
        return ['<div class="hoverinfo"><strong>',
                       geo.properties.name,
-                      ' was <br>',
+                      ' increased <br>',
                       geo.properties.temp,
-                      '<br> degrees celcius on average in ',
-                      geo.properties.year,
+                      '<br> degrees from ',
+                      geo.properties.year1,
+                      ' to ',
+                      geo.properties.year2,
                       '</strong></div>'].join('');
      }else{
        return   ['<div class="hoverinfo"><strong>',
